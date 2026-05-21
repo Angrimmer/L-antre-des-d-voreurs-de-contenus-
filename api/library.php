@@ -3,7 +3,12 @@ session_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../config/database.php';
 
-$userId = $_SESSION['user_id'] ?? 1;
+if (empty($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Non connecté']);
+    exit;
+}
+$userId = $_SESSION['user_id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
@@ -34,8 +39,8 @@ try {
                 }
             }
             $stmt = $db->prepare(
-                'INSERT INTO library_items (user_id, category, external_id, title, cover_url, year, status)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)
+                'INSERT INTO library_items (user_id, category, external_id, title, cover_url, year, status, book_type)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                  ON DUPLICATE KEY UPDATE title = VALUES(title)'
             );
             $stmt->execute([
@@ -46,6 +51,7 @@ try {
                 $body['cover_url'] ?? null,
                 $body['year']       ?? null,
                 $body['status']     ?? 'planifie',
+                $body['book_type']  ?? null,
             ]);
             echo json_encode(['success' => true, 'id' => $db->lastInsertId()]);
             break;
@@ -60,6 +66,7 @@ try {
                 'status', 'personal_rating', 'personal_notes',
                 'planned_date', 'current_episode', 'current_season', 'airing_season',
                 'temp_review', 'final_review',
+                'book_type', 'volumes_out', 'volumes_owned',
             ];
 
             $fields = [];

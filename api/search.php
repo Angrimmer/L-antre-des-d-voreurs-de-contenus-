@@ -10,11 +10,14 @@ if (strlen($query) < 2) {
     exit;
 }
 
+$subtype = trim($_GET['subtype'] ?? '');
+
 $results = match($cat) {
     'film'  => searchTMDB($query, 'movie'),
     'serie' => searchTMDB($query, 'tv'),
     'anime' => searchAniList($query),
     'jeu'   => searchRAWG($query),
+    'livre' => $subtype === 'manga' ? searchAniListManga($query) : searchOpenLibrary($query),
     default => [],
 };
 
@@ -52,7 +55,7 @@ function searchTMDB(string $query, string $type): array {
    AniList — Animes (GraphQL, pas de clé nécessaire)
    ============================================= */
 function searchAniList(string $query): array {
-    $gql = 'query($search: String) { Page(perPage: 10) { media(search: $search, type: ANIME, sort: POPULARITY_DESC) { id title { romaji english } startDate { year } coverImage { large } description(asHtml: false) } } }';
+    $gql = 'query($search: String) { Page(perPage: 10) { media(search: $search, type: ANIME, sort: POPULARITY_DESC) { id title { romaji english } startDate { year } coverImage { extraLarge large } description(asHtml: false) } } }';
 
     $payload = json_encode(['query' => $gql, 'variables' => ['search' => $query]]);
     $data    = fetchJSON('https://graphql.anilist.co', $payload);
@@ -67,7 +70,7 @@ function searchAniList(string $query): array {
             'external_id' => (string) $item['id'],
             'title'       => $title,
             'year'        => $item['startDate']['year'] ?? null,
-            'cover_url'   => $item['coverImage']['large'] ?? null,
+            'cover_url'   => $item['coverImage']['extraLarge'] ?? $item['coverImage']['large'] ?? null,
             'synopsis'    => mb_substr($synopsis, 0, 400),
         ];
     }, $data['data']['Page']['media']);
@@ -96,6 +99,59 @@ function searchRAWG(string $query): array {
 }
 
 /* =============================================
+   AniList — Manga
+   ============================================= */
+function searchAniListManga(string $query): array {
+    $gql = 'query($search: String) { Page(perPage: 10) { media(search: $search, type: MANGA, sort: POPULARITY_DESC) { id title { romaji english } startDate { year } coverImage { extraLarge large } description(asHtml: false) } } }';
+
+    $payload = json_encode(['query' => $gql, 'variables' => ['search' => $query]]);
+    $data    = fetchJSON('https://graphql.anilist.co', $payload);
+
+    if (!isset($data['data']['Page']['media'])) return [];
+
+    return array_map(function($item) {
+        $title    = $item['title']['english'] ?? $item['title']['romaji'] ?? '';
+        $synopsis = strip_tags($item['description'] ?? '');
+        return [
+            'external_id' => 'al_' . $item['id'],
+            'title'       => $title,
+            'year'        => $item['startDate']['year'] ?? null,
+            'cover_url'   => $item['coverImage']['extraLarge'] ?? $item['coverImage']['large'] ?? null,
+            'synopsis'    => mb_substr($synopsis, 0, 400),
+        ];
+    }, $data['data']['Page']['media']);
+}
+
+/* =============================================
+   Open Library — Livres & BD
+   ============================================= */
+function searchOpenLibrary(string $query): array {
+    $url  = 'https://openlibrary.org/search.json?q=' . urlencode($query)
+          . '&limit=10&fields=key,title,author_name,first_publish_year,cover_i,subject';
+    $data = fetchJSON($url);
+
+    if (!isset($data['docs'])) return [];
+
+    return array_filter(array_map(function($item) {
+        $title = $item['title'] ?? '';
+        if (!$title) return null;
+        $cover = isset($item['cover_i'])
+            ? 'https://covers.openlibrary.org/b/id/' . $item['cover_i'] . '-M.jpg'
+            : null;
+        $author   = isset($item['author_name']) ? implode(', ', array_slice($item['author_name'], 0, 2)) : '';
+        $synopsis = $author ? 'Par ' . $author : '';
+
+        return [
+            'external_id' => 'ol_' . ltrim($item['key'] ?? uniqid(), '/'),
+            'title'       => $title,
+            'year'        => $item['first_publish_year'] ?? null,
+            'cover_url'   => $cover,
+            'synopsis'    => $synopsis,
+        ];
+    }, $data['docs']));
+}
+
+/* =============================================
    Utilitaire HTTP (cURL)
    ============================================= */
 function fetchJSON(string $url, ?string $postBody = null): array {
@@ -109,7 +165,7 @@ function fetchJSON(string $url, ?string $postBody = null): array {
             'Accept: application/json',
             'User-Agent: AntreDevoLib/1.0',
         ],
-        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYPEER => false, // XAMPP n'a pas de bundle CA à jour
     ]);
 
     if ($postBody !== null) {

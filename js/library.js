@@ -76,8 +76,11 @@ async function doSearch() {
 
     searchResults.innerHTML = '<p class="search-loading">Recherche en cours...</p>';
 
+    const subtypeEl = document.getElementById('bookSubtype');
+    const subtype   = subtypeEl ? `&subtype=${subtypeEl.value}` : '';
+
     try {
-        const res  = await fetch(`api/search.php?q=${encodeURIComponent(q)}&cat=${CURRENT_CAT}`);
+        const res  = await fetch(`api/search.php?q=${encodeURIComponent(q)}&cat=${CURRENT_CAT}${subtype}`);
         const data = await res.json();
 
         if (!data.results || data.results.length === 0) {
@@ -134,6 +137,7 @@ document.getElementById('manualSubmit').addEventListener('click', async () => {
     btn.disabled    = true;
     btn.textContent = '...';
 
+    const subtypeEl  = document.getElementById('bookSubtype');
     const payload = {
         external_id: 'manual_' + Date.now(),
         title,
@@ -141,6 +145,7 @@ document.getElementById('manualSubmit').addEventListener('click', async () => {
         year:      document.getElementById('manualYear').value  || null,
         category:  CURRENT_CAT,
         status:    'planifie',
+        book_type: subtypeEl ? subtypeEl.value : null,
     };
 
     try {
@@ -166,6 +171,7 @@ document.getElementById('manualSubmit').addEventListener('click', async () => {
 
 // --- Ajout à la bibliothèque ---
 async function addItem(btn) {
+    const subtypeEl  = document.getElementById('bookSubtype');
     const payload = {
         external_id: btn.dataset.id,
         title:       btn.dataset.title,
@@ -173,6 +179,7 @@ async function addItem(btn) {
         year:        btn.dataset.year  || null,
         category:    CURRENT_CAT,
         status:      'planifie',
+        book_type:   subtypeEl ? subtypeEl.value : null,
     };
 
     btn.disabled    = true;
@@ -237,10 +244,36 @@ function showDetails(el) {
 }
 
 function renderDetails(item, listEl) {
+    const isLivre = item.category === 'livre';
+
     libDetails.innerHTML = `
         <div class="details-title">${escHtml(item.title)}</div>
 
         ${item.year ? `<div class="details-meta">📅 ${item.year}</div>` : ''}
+
+        ${isLivre ? `
+        <div class="details-status-wrap">
+            <label class="details-label">Type</label>
+            <select class="select-book-type" data-id="${item.id}">
+                <option value=""      ${!item.book_type                   ? 'selected' : ''}>— Non précisé —</option>
+                <option value="livre" ${item.book_type === 'livre' ? 'selected' : ''}>📖 Livre</option>
+                <option value="manga" ${item.book_type === 'manga' ? 'selected' : ''}>🇯🇵 Manga</option>
+                <option value="bd"    ${item.book_type === 'bd'    ? 'selected' : ''}>🎨 BD</option>
+            </select>
+        </div>
+        <div class="field-row">
+            <div class="field-group">
+                <label class="details-label">${item.book_type === 'livre' ? 'Livres possédés' : 'Tomes possédés'}</label>
+                <input type="number" class="details-input details-input--short" id="field_volumes_owned"
+                       min="0" placeholder="ex: 8" value="${item.volumes_owned ?? ''}">
+            </div>
+            <div class="field-group">
+                <label class="details-label">${item.book_type === 'livre' ? 'Livres sortis' : 'Tomes sortis'}</label>
+                <input type="number" class="details-input details-input--short" id="field_volumes_out"
+                       min="0" placeholder="ex: 12" value="${item.volumes_out ?? ''}">
+            </div>
+        </div>
+        ` : ''}
 
         <div class="details-status-wrap">
             <label class="details-label">Statut</label>
@@ -260,6 +293,32 @@ function renderDetails(item, listEl) {
             <button class="btn-remove" data-id="${item.id}">Supprimer</button>
         </div>
     `;
+
+    // Changement de type (livre/manga/bd)
+    const selectBookType = libDetails.querySelector('.select-book-type');
+    if (selectBookType) {
+        selectBookType.addEventListener('change', async function () {
+            item.book_type = this.value || null;
+            await save(item.id, { book_type: this.value || null });
+        });
+    }
+
+    // Autosave volumes
+    ['field_volumes_out', 'field_volumes_owned'].forEach(fieldId => {
+        const col = fieldId.replace('field_', '');
+        const el = libDetails.querySelector(`#${fieldId}`);
+        if (!el) return;
+        let t = null;
+        el.addEventListener('input', () => {
+            item[col] = el.value;
+            clearTimeout(t);
+            t = setTimeout(() => save(item.id, { [col]: el.value || null }), 800);
+        });
+        el.addEventListener('blur', () => {
+            clearTimeout(t);
+            save(item.id, { [col]: el.value || null });
+        });
+    });
 
     // Changement de statut → on redessine les champs + on sauvegarde
     libDetails.querySelector('.select-status').addEventListener('change', async function () {
@@ -291,8 +350,9 @@ function renderDetails(item, listEl) {
 
 // Génère le HTML des champs selon le statut et la catégorie
 function renderStatusFields(item) {
-    const isFilm = item.category === 'film';
-    const isJeu  = item.category === 'jeu';
+    const isFilm  = item.category === 'film';
+    const isJeu   = item.category === 'jeu';
+    const isLivre = item.category === 'livre';
 
     switch (item.status) {
 
@@ -302,9 +362,21 @@ function renderStatusFields(item) {
                     <label class="details-label">Date prévue</label>
                     <input type="date" class="details-input" id="field_planned_date"
                            value="${item.planned_date ?? ''}">
+                </div>
+                <div class="field-group">
+                    <label class="details-label">Notes</label>
+                    <textarea class="details-textarea" id="field_personal_notes"
+                              placeholder="Pourquoi tu veux voir ça, où tu en as entendu parler...">${escHtml(item.personal_notes ?? '')}</textarea>
                 </div>`;
 
         case 'en_cours':
+            if (isLivre) return `
+                <div class="field-group">
+                    <label class="details-label">Avis temporaire</label>
+                    <textarea class="details-textarea" id="field_temp_review"
+                              placeholder="Tes impressions pour l'instant...">${escHtml(item.temp_review ?? '')}</textarea>
+                </div>`;
+
             if (isFilm) return `
                 <div class="field-group">
                     <label class="details-label">Opus actuel</label>
@@ -355,7 +427,7 @@ function renderStatusFields(item) {
                 </div>`;
 
         case 'termine':
-            if (isFilm || isJeu) return `
+            if (isFilm || isJeu || isLivre) return `
                 <div class="field-group">
                     <label class="details-label">Avis définitif</label>
                     <textarea class="details-textarea" id="field_final_review"
@@ -397,6 +469,7 @@ function bindStatusFields(item) {
         field_current_season:  'current_season',
         field_temp_review:     'temp_review',
         field_final_review:    'final_review',
+        field_personal_notes:  'personal_notes',
     };
 
     let saveTimer = null;

@@ -2,9 +2,14 @@
 session_start();
 require_once __DIR__ . '/config/database.php';
 
-$userId = $_SESSION['user_id'] ?? 1;
+if (empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$userId = $_SESSION['user_id'];
 $category = $_GET['cat'] ?? 'anime';
-$validCats = ['film', 'serie', 'anime', 'jeu'];
+$validCats = ['film', 'serie', 'anime', 'jeu', 'livre'];
 if (!in_array($category, $validCats)) $category = 'anime';
 
 $items = [];
@@ -19,7 +24,7 @@ try {
     // DB pas encore configurée — on affiche quand même la page
 }
 
-$labels = ['film' => 'Films', 'serie' => 'Séries', 'anime' => 'Animes', 'jeu' => 'Jeux'];
+$labels = ['film' => 'Films', 'serie' => 'Séries', 'anime' => 'Animes', 'jeu' => 'Jeux', 'livre' => 'Livres'];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -124,10 +129,21 @@ $labels = ['film' => 'Films', 'serie' => 'Séries', 'anime' => 'Animes', 'jeu' =
         <div class="modal">
             <button class="modal-close" id="modalClose">✕</button>
             <h2 class="modal-title">Ajouter un <?= $labels[$category] ?></h2>
+            <?php if ($category === 'livre'): ?>
+            <div class="search-bar search-bar--book">
+                <select id="bookSubtype" class="select-book-search">
+                    <option value="livre">📖 Livre / BD</option>
+                    <option value="manga">🇯🇵 Manga</option>
+                </select>
+                <input type="text" id="searchInput" placeholder="Rechercher..." autocomplete="off">
+                <button id="searchBtn">Rechercher</button>
+            </div>
+            <?php else: ?>
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Rechercher..." autocomplete="off">
                 <button id="searchBtn">Rechercher</button>
             </div>
+            <?php endif; ?>
             <div class="search-results" id="searchResults"></div>
 
             <div class="manual-sep">— ou ajouter manuellement —</div>

@@ -36,13 +36,15 @@ $labels = ['film' => 'Films', 'serie' => 'Séries', 'anime' => 'Animes', 'jeu' =
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/library.css">
+    <link rel="icon" href="src/assets/controller.png"/>
 </head>
 <body class="library-page">
 
     <!-- En-tête -->
     <header class="lib-header">
         <a href="index.php" class="lib-logo">
-            <span class="logo-icon">📚</span>
+            <span class="lib-logo"><img src="src/assets/button_on.png" alt="logo" style="width:3em; height:auto; display:block;"/>
+            </span>
         </a>
         <nav class="lib-tabs">
             <?php foreach ($labels as $cat => $label): ?>

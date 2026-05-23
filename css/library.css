@@ -247,7 +247,7 @@ body.library-page {
 }
 
 .details-genres {
-    display: flex;
+    display: flex; 
     flex-wrap: wrap;
     gap: .4rem;
 }

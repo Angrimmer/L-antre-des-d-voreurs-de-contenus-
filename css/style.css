@@ -16,6 +16,8 @@
     --font-mono:       'Courier New', Courier, monospace;
 }
 
+html { font-size: 21px; }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -45,13 +47,13 @@ body.landing {
 }
 
 .btn-nav {
-    padding: .5rem 1.2rem;
+    padding: .6rem 1.4rem;
     border: 1px solid var(--purple-border);
     border-radius: 20px;
     background: var(--bg-card);
     color: var(--text-secondary);
     font-family: var(--font-mono);
-    font-size: .8rem;
+    font-size: .95rem;
     cursor: pointer;
     transition: border-color .2s, color .2s;
 }
@@ -76,14 +78,14 @@ body.landing {
 
 .landing-title {
     font-family: var(--font-pixel);
-    font-size: clamp(.9rem, 2.5vw, 1.4rem);
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
     color: var(--text-secondary);
-    line-height: 1.8;
+    line-height: 2;
     letter-spacing: .05em;
 }
 
 .landing-subtitle {
-    font-size: .9rem;
+    font-size: 1.05rem;
     color: var(--purple-light);
     line-height: 1.6;
 }
@@ -94,35 +96,7 @@ body.landing {
 }
 
 .pixel-art {
-    max-width: 200px;
+    max-width: 260px;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-}
-
-.art-fallback {
-    font-size: 4rem;
-    display: flex;
-    gap: 1rem;
-    filter: hue-rotate(260deg);
-}
-
-/* Bouton Start */
-.btn-start {
-    display: inline-block;
-    padding: .9rem 2rem;
-    background: var(--bg-card);
-    border: 2px solid var(--purple-dim);
-    border-radius: 30px;
-    font-family: var(--font-mono);
-    font-size: .95rem;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: border-color .2s, background .2s, box-shadow .2s;
-    margin-top: .5rem;
-}
-
-.btn-start:hover {
-    border-color: var(--purple-light);
-    background: var(--purple-dim);
-    box-shadow: 0 0 20px rgba(124, 58, 237, .3);
 }

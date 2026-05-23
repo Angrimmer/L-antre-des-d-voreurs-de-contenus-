@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="src/assets/controller.png"/>
 </head>
 <body class="landing">
 
@@ -21,16 +22,21 @@
         <p class="landing-subtitle">Votre base de données perso pour ne plus oublier vos sources favorites !</p>
 
         <div class="landing-art">
-            <!-- Remplace cette image par ton pixel art une fois que tu l'as -->
-            <img src="assets/pixel-art.png" alt="Pixel art gamepad" class="pixel-art"
-                 onerror="this.style.display='none'; document.getElementById('art-fallback').style.display='block'">
-            <div id="art-fallback" class="art-fallback" style="display:none;">
-                <span>🎮</span>
-                <span>📚</span>
-            </div>
+            
+            <img src="src/assets/controller.png" alt="logo de l'antre des dévoreurs de contenu v1.0" class="pixel-art">
         </div>
 
-        <a href="page-principale.php" class="btn-start">Appuyez sur Start...</a>
+        <a href="page-principale.php" class="btn-start-link">
+          <img 
+            src="src/assets/button_off.png" 
+            alt="Start"
+            class="btn-start-img"
+            style="width:10em; height:auto; display:block;"
+            onmouseenter="this.src='src/assets/button_on.png'"
+            onmouseleave="this.src='src/assets/button_off.png'">
+        </a>
+
+        <span class="press_enter">appuyez sur start pour commencer</span>
     </main>
 
 </body>

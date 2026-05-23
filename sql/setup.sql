@@ -24,3 +24,5 @@ CREATE TABLE IF NOT EXISTS library_items (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE KEY unique_item (user_id, category, external_id)
 );
+
+-- Crée ton compte via http://localhost/antre-devo/register.php

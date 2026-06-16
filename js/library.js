@@ -52,6 +52,10 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') lightbox.classList.remove('open');
 });
 
+// Données PHP passées via data-* attributes sur le body
+const CURRENT_CAT = document.body.dataset.cat;
+const ITEMS       = JSON.parse(document.body.dataset.items || '[]');
+
 // Copie locale des items pour mise à jour sans rechargement
 let items = [...ITEMS];
 
@@ -91,19 +95,19 @@ async function doSearch() {
         searchResults.innerHTML = data.results.map(item => `
             <div class="result-card">
                 <img class="result-cover"
-                     src="${item.cover_url ?? ''}"
+                     src="${escAttr(item.cover_url ?? '')}"
                      alt="${escHtml(item.title)}"
                      onerror="this.style.visibility='hidden'">
                 <div class="result-info">
                     <div class="result-title">${escHtml(item.title)}</div>
-                    <div class="result-year">${item.year ?? ''}</div>
+                    <div class="result-year">${escHtml(item.year ?? '')}</div>
                     <div class="result-synopsis">${escHtml(item.synopsis ?? '')}</div>
                 </div>
                 <button class="btn-result-add"
-                        data-id="${item.external_id}"
+                        data-id="${escAttr(item.external_id)}"
                         data-title="${escAttr(item.title)}"
                         data-cover="${escAttr(item.cover_url ?? '')}"
-                        data-year="${item.year ?? ''}">
+                        data-year="${escAttr(item.year ?? '')}">
                     + Ajouter
                 </button>
             </div>
@@ -249,7 +253,7 @@ function renderDetails(item, listEl) {
     libDetails.innerHTML = `
         <div class="details-title">${escHtml(item.title)}</div>
 
-        ${item.year ? `<div class="details-meta">📅 ${item.year}</div>` : ''}
+        ${item.year ? `<div class="details-meta">📅 ${escHtml(item.year)}</div>` : ''}
 
         ${isLivre ? `
         <div class="details-status-wrap">

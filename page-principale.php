@@ -38,7 +38,9 @@ $labels = ['film' => 'Films', 'serie' => 'Séries', 'anime' => 'Animes', 'jeu' =
     <link rel="stylesheet" href="css/library.css">
     <link rel="icon" href="src/assets/controller.png"/>
 </head>
-<body class="library-page">
+<body class="library-page"
+      data-cat="<?= htmlspecialchars($category) ?>"
+      data-items="<?= htmlspecialchars(json_encode($items), ENT_QUOTES) ?>">
 
     <!-- En-tête -->
     <header class="lib-header">
@@ -158,11 +160,6 @@ $labels = ['film' => 'Films', 'serie' => 'Séries', 'anime' => 'Animes', 'jeu' =
         </div>
     </div>
 
-    <script>
-        // Données PHP → JS
-        const CURRENT_CAT = '<?= $category ?>';
-        const ITEMS = <?= json_encode($items) ?>;
-    </script>
     <script src="js/library.js"></script>
 
 </body>

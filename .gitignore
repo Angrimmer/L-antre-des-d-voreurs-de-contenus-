@@ -1,2 +1,4 @@
 config/config.php
-src/assets/
+.src/
+phpunit.phar
+composer.phar

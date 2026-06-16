@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: Run PHPUnit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo, pdo_sqlite
+          coverage: none
+
+      - name: Download PHPUnit
+        run: curl -sSL https://phar.phpunit.de/phpunit-11.phar -o phpunit.phar
+
+      - name: Run tests
+        run: php phpunit.phar --configuration phpunit.xml

@@ -12,8 +12,8 @@
 <body class="landing">
 
     <nav class="nav-landing">
-        <a href="#" class="btn-nav">À propos</a>
-        <a href="#" class="btn-nav">Nous contacter</a>
+        <button class="btn-nav" id="btnAbout">À propos</button>
+        <button class="btn-nav" id="btnContact">Nous contacter</button>
         <a href="login.php" class="btn-nav">Se connecter</a>
     </nav>
 
@@ -27,17 +27,48 @@
         </div>
 
         <a href="page-principale.php" class="btn-start-link">
-          <img 
-            src="src/assets/button_off.png" 
-            alt="Start"
-            class="btn-start-img"
-            style="width:10em; height:auto; display:block;"
-            onmouseenter="this.src='src/assets/button_on.png'"
-            onmouseleave="this.src='src/assets/button_off.png'">
+            <img src="src/assets/button_off.png" alt="Start" class="btn-start-img" id="btnStart">
         </a>
 
         <span class="press_enter">appuyez sur start pour commencer</span>
     </main>
+
+    <!-- Modale À propos -->
+    <div class="landing-modal-overlay" id="modalAbout">
+        <div class="landing-modal">
+            <button class="landing-modal-close" data-close="modalAbout">✕</button>
+            <h2 class="landing-modal-title">À propos</h2>
+            <div class="landing-modal-body">
+                <p>Bienvenue dans <strong>L'Antre des Dévoreurs de Contenu</strong> — un outil personnel conçu pour ne plus jamais perdre le fil de tes séries, films, animes et jeux vidéo.</p>
+                <p>Ici, pas de réseau social, pas de recommandations algorithmiques. Juste ta bibliothèque, à toi, organisée comme tu l'entends : planifié, en cours, terminé, abandonné.</p>
+                <p>Le projet est né d'un besoin simple : avoir un endroit unique pour tout tracker, avec une interface qui a du caractère.</p>
+                <p>Je suis un dev seul sur le projet, mais n'hésitez pas à me contacter si vous avez des idées ou des suggestions !</p>
+                <p>Petite mention spéciale pour un de mes amis (un frère, que dis-je !) qui préfère rester plus anonyme et à qui je dois mon logo ici et mes boutons !</p>
+                <p class="landing-modal-version">v1.0 — Projet personnel</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale Contact -->
+    <div class="landing-modal-overlay" id="modalContact">
+        <div class="landing-modal">
+            <button class="landing-modal-close" data-close="modalContact">✕</button>
+            <h2 class="landing-modal-title">Nous contacter</h2>
+            <div class="landing-modal-body">
+                <p>Une question, une suggestion ou juste envie de dire bonjour ?</p>
+                <p class="contact-email">📧 <a href="mailto:angrimmer@pm.me">angrimmer@pm.me</a></p>
+                <form class="contact-form" id="contactForm">
+                    <input  type="text"  name="name"    class="contact-input" placeholder="Ton nom" required>
+                    <input  type="email" name="email"   class="contact-input" placeholder="Ton email" required>
+                    <textarea            name="message" class="contact-textarea" placeholder="Ton message..." required></textarea>
+                    <button type="submit" class="contact-submit">Envoyer</button>
+                </form>
+                <p class="contact-feedback" id="contactFeedback"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/landing.js"></script>
 
 </body>
 </html>

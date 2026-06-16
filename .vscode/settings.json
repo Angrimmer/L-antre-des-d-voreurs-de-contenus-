@@ -1,0 +1,6 @@
+{
+    "files.exclude": {
+        "phpunit.phar": true,
+        "composer.phar": true
+    }
+}

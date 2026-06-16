@@ -19,8 +19,8 @@ try {
         exit;
     }
 
-    if (strlen($password) < 6) {
-        header('Location: login.php?error=Le+mot+de+passe+doit+faire+au+moins+6+caractères');
+    if (strlen($password) < 6 || strlen($password) > 255) {
+        header('Location: login.php?error=Mot+de+passe+invalide+(6-255+caractères)');
         exit;
     }
 

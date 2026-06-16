@@ -1,5 +1,19 @@
 <?php
+session_start();
 header('Content-Type: application/json; charset=utf-8');
+
+// Rate limiting — max 3 envois par heure
+if (!isset($_SESSION['contact_count'])) {
+    $_SESSION['contact_count'] = 0;
+    $_SESSION['contact_last']  = time();
+}
+if (time() - $_SESSION['contact_last'] > 3600) {
+    $_SESSION['contact_count'] = 0;
+    $_SESSION['contact_last']  = time();
+}
+if ($_SESSION['contact_count'] >= 3) {
+    echo json_encode(['error' => 'Trop de messages envoyés. Réessaie dans une heure.']); exit;
+}
 
 // --- Nettoyage brut ---
 $name    = trim(strip_tags($_POST['name']    ?? ''));
@@ -45,6 +59,7 @@ $headers = implode("\r\n", [
 ]);
 
 if (mail($to, $subject, $body, $headers)) {
+    $_SESSION['contact_count']++;
     echo json_encode(['success' => true]);
 } else {
     echo json_encode(['error' => "Échec de l'envoi. Contacte-nous directement par email."]);

@@ -14,8 +14,8 @@ class AuthService
         if (strlen($username) < 3 || strlen($username) > 50) {
             return ['error' => 'Nom d\'utilisateur invalide (3-50 caractères).'];
         }
-        if (strlen($password) < 6) {
-            return ['error' => 'Mot de passe trop court (6 caractères min).'];
+        if (strlen($password) < 6 || strlen($password) > 255) {
+            return ['error' => 'Mot de passe invalide (6-255 caractères).'];
         }
 
         $stmt = $this->db->prepare('SELECT id FROM users WHERE username = ?');

@@ -165,7 +165,7 @@ function fetchJSON(string $url, ?string $postBody = null): array {
             'Accept: application/json',
             'User-Agent: AntreDevoLib/1.0',
         ],
-        CURLOPT_SSL_VERIFYPEER => false, // XAMPP n'a pas de bundle CA à jour
+        CURLOPT_SSL_VERIFYPEER => VERIFY_SSL,
     ]);
 
     if ($postBody !== null) {

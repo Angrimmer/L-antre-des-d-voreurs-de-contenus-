@@ -14,11 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm  = $_POST['confirm']  ?? '';
+    $invite   = trim($_POST['invite_code'] ?? '');
 
-    if (!$username || !$password || !$confirm) {
+    if (!$username || !$password || !$confirm || !$invite) {
         $error = 'Remplis tous les champs.';
+    } elseif ($invite !== INVITE_CODE) {
+        $error = 'Code d\'invitation invalide.';
     } elseif (strlen($password) < 6) {
         $error = 'Le mot de passe doit faire au moins 6 caractères.';
+    } elseif (strlen($password) > 255) {
+        $error = 'Le mot de passe est trop long (255 caractères max).';
     } elseif ($password !== $confirm) {
         $error = 'Les mots de passe ne correspondent pas.';
     } else {
@@ -81,6 +86,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field">
                     <label for="confirm">Confirmer le mot de passe</label>
                     <input type="password" id="confirm" name="confirm" required autocomplete="new-password">
+                </div>
+                <div class="field">
+                    <label for="invite_code">Code d'invitation</label>
+                    <input type="password" id="invite_code" name="invite_code" required autocomplete="off">
                 </div>
                 <button type="submit" class="btn-submit">Créer le compte</button>
             </form>

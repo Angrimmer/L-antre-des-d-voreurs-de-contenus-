@@ -48,6 +48,18 @@ class AuthServiceTest extends TestCase
         $this->assertArrayHasKey('error', $result);
     }
 
+    public function testRegisterPasswordTooLongReturnsError(): void
+    {
+        $result = $this->auth->register('alice', str_repeat('a', 256));
+        $this->assertArrayHasKey('error', $result);
+    }
+
+    public function testRegisterPasswordExactly255CharsIsValid(): void
+    {
+        $result = $this->auth->register('alice', str_repeat('a', 255));
+        $this->assertTrue($result['success']);
+    }
+
     public function testRegisterUsernameExactly3CharsIsValid(): void
     {
         $result = $this->auth->register('bob', 'password123');

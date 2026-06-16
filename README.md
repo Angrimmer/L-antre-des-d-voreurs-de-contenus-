@@ -7,6 +7,8 @@ Ce projet est né d'un besoin très simple : ne plus perdre le fil de tout ce qu
 
 L'idée c'est d'avoir un endroit unique pour tracker films, séries, animes et jeux vidéo — avec le statut, les notes, les avis en cours de route, et tout ça sauvegardé automatiquement.
 
+Lors du lancement, je ferais une phase "fermée" de test ou j'inviterais d'abord des personnes ici et là pour voir si tout est ok et bien peaufiner avant de lancer pleinement ! Merci pour votre compréhension !
+
 ## Ce qui m'a amusé dans ce projet ?
 
 C'est clairement le côté "full stack from scratch" sans framework. Pas de React, pas de Laravel — du PHP vanilla, du JS vanilla, du CSS à la main. On se retrouve vite à se demander "comment je fais passer mes données PHP côté JS proprement ?" ou "comment je structure mes API sans ORM ?". Ce genre de questions qu'on finit par résoudre et qui font qu'on comprend vraiment ce qu'on fait.

@@ -8,32 +8,51 @@ if (!empty($_SESSION['user_id'])) {
     exit;
 }
 
+// Rate limiting — max 5 tentatives par 15 minutes
+if (!isset($_SESSION['login_attempts'])) {
+    $_SESSION['login_attempts'] = 0;
+    $_SESSION['login_last']     = time();
+}
+if (time() - $_SESSION['login_last'] > 900) {
+    $_SESSION['login_attempts'] = 0;
+    $_SESSION['login_last']     = time();
+}
+
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-
-    if ($username && $password) {
-        try {
-            $db   = getDB();
-            $stmt = $db->prepare('SELECT id, username, password_hash FROM users WHERE username = ?');
-            $stmt->execute([$username]);
-            $user = $stmt->fetch();
-
-            if ($user && password_verify($password, $user['password_hash'])) {
-                $_SESSION['user_id']  = $user['id'];
-                $_SESSION['username'] = $user['username'];
-                header('Location: page-principale.php');
-                exit;
-            } else {
-                $error = 'Nom d\'utilisateur ou mot de passe incorrect.';
-            }
-        } catch (PDOException) {
-            $error = 'Impossible de se connecter à la base de données.';
-        }
+    if ($_SESSION['login_attempts'] >= 5) {
+        $error = 'Trop de tentatives. Réessaie dans 15 minutes.';
     } else {
-        $error = 'Remplis tous les champs.';
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (!$username || !$password) {
+            $error = 'Remplis tous les champs.';
+        } elseif (strlen($password) > 255) {
+            $error = 'Mot de passe invalide.';
+        } else {
+            try {
+                $db   = getDB();
+                $stmt = $db->prepare('SELECT id, username, password_hash FROM users WHERE username = ?');
+                $stmt->execute([$username]);
+                $user = $stmt->fetch();
+
+                if ($user && password_verify($password, $user['password_hash'])) {
+                    $_SESSION['login_attempts'] = 0;
+                    $_SESSION['user_id']        = $user['id'];
+                    $_SESSION['username']       = $user['username'];
+                    header('Location: page-principale.php');
+                    exit;
+                } else {
+                    $_SESSION['login_attempts']++;
+                    $_SESSION['login_last'] = time();
+                    $error = 'Nom d\'utilisateur ou mot de passe incorrect.';
+                }
+            } catch (PDOException) {
+                $error = 'Impossible de se connecter à la base de données.';
+            }
+        }
     }
 }
 
